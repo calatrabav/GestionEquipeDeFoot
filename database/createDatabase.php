@@ -23,7 +23,7 @@ class createDatabase
     }
     private function createTables()
     {
-        $query = 'CREATE TABLE Joueurs (
+        $query = 'CREATE TABLE IF NOT EXISTS Joueurs (
     idJoueur INT AUTO_INCREMENT PRIMARY KEY,
     nomJoueur VARCHAR(50) NOT NULL,
     prenomJoueur VARCHAR(50) NOT NULL,
@@ -35,7 +35,7 @@ class createDatabase
     postePrincipal VARCHAR(50),
     victoire BOOLEAN
 );
-CREATE TABLE Matches (
+CREATE TABLE IF NOT EXISTS Matches (
     idMatch INT AUTO_INCREMENT PRIMARY KEY,
     dateMatch DATE NOT NULL,
     heureMatch TIME NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE Matches (
     matchNul BOOLEAN,
     scoreEquipeAdverse INT NOT NULL
 );
-CREATE TABLE Participer (
+CREATE TABLE IF NOT EXISTS Participer (
     idMatch INT NOT NULL,
     idJoueur INT NOT NULL,
     evaluation INT,
