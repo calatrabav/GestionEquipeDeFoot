@@ -54,4 +54,4 @@ if (!empty($joueurs)):
 $pdo = null;
 ?>
 
-<?php include 'includes/footer.php'; ?>
+<?php include 'src/includes/footer.php'; ?>

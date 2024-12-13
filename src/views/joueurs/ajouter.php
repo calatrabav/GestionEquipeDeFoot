@@ -17,4 +17,4 @@
     <br>
     <button type="submit">Ajouter</button>
 </form>
-<?php include 'includes/footer.php'; ?>
+<?php include 'src/includes/footer.php'; ?>
