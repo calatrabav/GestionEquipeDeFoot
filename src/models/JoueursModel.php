@@ -2,7 +2,7 @@
 class JoueursModel {
     public static function getAll() {
         global $pdo;
-        $stmt = $pdo->query("SELECT * FROM joueurs ORDER BY id ASC");
+        $stmt = $pdo->query("SELECT * FROM Joueurs ORDER BY idJoueur ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
