@@ -1,35 +1,38 @@
 <?php
 class JoueursModel {
-    private $pdo;
-
-    public function __construct($pdo) {
-        $this->pdo = $pdo;
-    }
-
-    public function getAllJoueurs() {
-        $stmt = $this->pdo->query("SELECT * FROM Joueurs");
+    public static function getAll() {
+        global $pdo;
+        $stmt = $pdo->query("SELECT * FROM joueurs ORDER BY id ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
-    public function getJoueurById($id) {
-        $stmt = $this->pdo->prepare("SELECT * FROM Joueurs WHERE idJoueur = ?");
+    
+    public static function getById($id) {
+        global $pdo;
+        $stmt = $pdo->prepare("SELECT * FROM joueurs WHERE id = ?");
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function addJoueur($nom, $prenom, $statut) {
-        $stmt = $this->pdo->prepare("INSERT INTO Joueurs (nomJoueur, prenomJoueur, statut) VALUES (?, ?, ?)");
-        return $stmt->execute([$nom, $prenom, $statut]);
+    public static function create($data) {
+        global $pdo;
+        // On suppose que $data['nom'] est présent
+        $stmt = $pdo->prepare("INSERT INTO joueurs (nom) VALUES (?)");
+        $stmt->execute([$data['nom']]);
+        return $pdo->lastInsertId();
     }
 
-    public function updateJoueur($id, $nom, $prenom, $statut) {
-        $stmt = $this->pdo->prepare("UPDATE Joueurs SET nomJoueur = ?, prenomJoueur = ?, statut = ? WHERE idJoueur = ?");
-        return $stmt->execute([$nom, $prenom, $statut, $id]);
+    public static function update($id, $data) {
+        global $pdo;
+        // On suppose que $data['nom'] est présent
+        $stmt = $pdo->prepare("UPDATE joueurs SET nom = ? WHERE id = ?");
+        $stmt->execute([$data['nom'], $id]);
+        return $stmt->rowCount() > 0;
     }
 
-    public function deleteJoueur($id) {
-        $stmt = $this->pdo->prepare("DELETE FROM Joueurs WHERE idJoueur = ?");
-        return $stmt->execute([$id]);
+    public static function delete($id) {
+        global $pdo;
+        $stmt = $pdo->prepare("DELETE FROM joueurs WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->rowCount() > 0;
     }
 }
-?>

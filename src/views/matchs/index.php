@@ -1,61 +1,26 @@
-<?php include "../includes/menu.php"; ?>
+<?php require_once "../views/layout/header.php"; ?>
 
-<h1>Liste des Matchs</h1>
+<h2>Liste des matchs</h2>
+<table style="width:100%; border-collapse: collapse;">
+    <tr style="background:#eee;">
+        <th style="border:1px solid #ccc; padding:8px;">ID</th>
+        <th style="border:1px solid #ccc; padding:8px;">Nom</th>
+        <th style="border:1px solid #ccc; padding:8px;">Date</th>
+        <th style="border:1px solid #ccc; padding:8px;">Actions</th>
+    </tr>
+    <?php foreach($matchs as $match): ?>
+    <tr>
+        <td style="border:1px solid #ccc; padding:8px; text-align:center;"><?= $match['id'] ?></td>
+        <td style="border:1px solid #ccc; padding:8px;"><?= htmlspecialchars($match['nom']) ?></td>
+        <td style="border:1px solid #ccc; padding:8px;"><?= htmlspecialchars($match['date']) ?></td>
+        <td style="border:1px solid #ccc; padding:8px; text-align:center;">
+            <a class="btn" href="index.php?controller=matchs&action=modifier&id=<?= $match['id'] ?>">Modifier</a>
+            <a class="btn" style="background:red;" href="index.php?controller=matchs&action=supprimer&id=<?= $match['id'] ?>">Supprimer</a>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<br>
+<a class="btn" href="index.php?controller=matchs&action=ajouter">Ajouter un match</a>
 
-<?php
-// Connexion à la base de données avec PDO
-try {
-    $pdo = new PDO('mysql:host=host;dbname=database;charset=utf8', 'user', 'password');
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die('Erreur de connexion : ' . $e->getMessage());
-}
-
-// Requête pour récupérer les matchs
-$query = "SELECT * FROM Matchs";
-try {
-    $stmt = $pdo->query($query);
-    $matchs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die('Erreur lors de la requête : ' . $e->getMessage());
-}
-
-// Vérifier s'il y a des matchs
-if (!empty($matchs)):
-    ?>
-    <table>
-        <thead>
-        <tr>
-            <th>Date</th>
-            <th>Heure</th>
-            <th>Lieu</th>
-            <th>Équipe Adverse</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php foreach ($matchs as $match): ?>
-            <tr>
-                <td><?= htmlspecialchars($match['dateMatch']) ?></td>
-                <td><?= htmlspecialchars($match['heureMatch']) ?></td>
-                <td><?= htmlspecialchars($match['lieuRencontre']) ?></td>
-                <td><?= htmlspecialchars($match['nomEquipeAdverse']) ?></td>
-                <td>
-                    <a href="index.php?controller=matchs&action=modifier&id=<?= $match['idMatch'] ?>">Modifier</a> |
-                    <a href="index.php?controller=matchs&action=supprimer&id=<?= $match['idMatch'] ?>"
-                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce match ?')">Supprimer</a>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-        </tbody>
-    </table>
-<?php else: ?>
-    <p>Aucun match trouvé.</p>
-<?php endif; ?>
-
-<a href="index.php?controller=matchs&action=ajouter">Ajouter un match</a>
-
-<?php
-// Fermeture de la connexion
-$pdo = null;
-?>
+<?php require_once "../views/layout/footer.php"; ?>

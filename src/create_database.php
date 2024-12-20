@@ -11,8 +11,8 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Création de la base de données
-    $pdo->exec("CREATE DATABASE IF NOT EXISTS GestionMatchs;");
-    $pdo->exec("USE GestionMatchs;");
+    $pdo->exec("CREATE DATABASE IF NOT EXISTS gestion_matchs;");
+    $pdo->exec("USE gestion_matchs;");
 
     // Création des tables
     $pdo->exec("CREATE TABLE IF NOT EXISTS Joueurs (
@@ -53,6 +53,14 @@ try {
         FOREIGN KEY (idJoueur) REFERENCES Joueurs(idJoueur) ON DELETE CASCADE,
         FOREIGN KEY (idMatch) REFERENCES Matchs(idMatch) ON DELETE CASCADE
     );");
+
+$pdo->exec("CREATE TABLE `users` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(100) NOT NULL,
+  `password` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+");
 
     echo "Base de données et tables créées avec succès.";
 

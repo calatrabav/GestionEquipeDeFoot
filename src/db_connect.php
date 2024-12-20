@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$dbname = 'GestionMatchs';
+$dbname = 'gestion_matchs'; // Assure-toi que ce nom correspond à ta base
 $username = 'root';
 $password = '';
 
@@ -10,4 +10,3 @@ try {
 } catch (PDOException $e) {
     die("Erreur de connexion : " . $e->getMessage());
 }
-?>

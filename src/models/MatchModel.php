@@ -1,37 +1,38 @@
 <?php
-require_once "../db_connect.php";
-
 class MatchModel {
     public static function getAll() {
-        $db = db_connect();
-        $query = $db->query("SELECT * FROM Matchs");
-        return $query->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public static function ajouter($data) {
-        $db = db_connect();
-        $query = $db->prepare("INSERT INTO Matchs (dateMatch, heureMatch, lieuRencontre, nomEquipeAdverse) VALUES (:dateMatch, :heureMatch, :lieuRencontre, :nomEquipeAdverse)");
-        $query->execute($data);
-    }
-
-    public static function supprimer($id) {
-        $db = db_connect();
-        $query = $db->prepare("DELETE FROM Matchs WHERE idMatch = :id");
-        $query->execute(['id' => $id]);
+        global $pdo;
+        $stmt = $pdo->query("SELECT * FROM matchs ORDER BY date ASC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function getById($id) {
-        $db = db_connect();
-        $query = $db->prepare("SELECT * FROM Matchs WHERE idMatch = :id");
-        $query->execute(['id' => $id]);
-        return $query->fetch(PDO::FETCH_ASSOC);
+        global $pdo;
+        $stmt = $pdo->prepare("SELECT * FROM matchs WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public static function modifier($id, $data) {
-        $db = db_connect();
-        $query = $db->prepare("UPDATE Matchs SET dateMatch = :dateMatch, heureMatch = :heureMatch, lieuRencontre = :lieuRencontre, nomEquipeAdverse = :nomEquipeAdverse WHERE idMatch = :id");
-        $data['id'] = $id;
-        $query->execute($data);
+    public static function create($data) {
+        global $pdo;
+        // On suppose que $data['nom'] et $data['date'] sont présents
+        $stmt = $pdo->prepare("INSERT INTO matchs (nom, date) VALUES (?, ?)");
+        $stmt->execute([$data['nom'], $data['date']]);
+        return $pdo->lastInsertId();
+    }
+
+    public static function update($id, $data) {
+        global $pdo;
+        // On suppose que $data['nom'] et $data['date'] sont présents
+        $stmt = $pdo->prepare("UPDATE matchs SET nom = ?, date = ? WHERE id = ?");
+        $stmt->execute([$data['nom'], $data['date'], $id]);
+        return $stmt->rowCount() > 0;
+    }
+
+    public static function delete($id) {
+        global $pdo;
+        $stmt = $pdo->prepare("DELETE FROM matchs WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->rowCount() > 0;
     }
 }
-?>
