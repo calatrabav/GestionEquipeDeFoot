@@ -1,21 +1,35 @@
-<?php require_once "../views/layout/header.php"; ?>
+<?php require_once __DIR__ . "/../layout/header.php"; ?>
 
 <h2>Liste des matchs</h2>
-<table style="width:100%; border-collapse: collapse;">
+<table>
     <tr style="background:#eee;">
-        <th style="border:1px solid #ccc; padding:8px;">ID</th>
-        <th style="border:1px solid #ccc; padding:8px;">Nom</th>
-        <th style="border:1px solid #ccc; padding:8px;">Date</th>
-        <th style="border:1px solid #ccc; padding:8px;">Actions</th>
+        <th>ID Match</th>
+        <th>Date</th>
+        <th>Heure</th>
+        <th>Équipe Adverse</th>
+        <th>Lieu</th>
+        <th>Compétition</th>
+        <th>Score Équipe</th>
+        <th>Score Adverse</th>
+        <th>Victoire</th>
+        <th>Match Nul</th>
+        <th>Actions</th>
     </tr>
-    <?php foreach($matchs as $match): ?>
+    <?php foreach($matchs as $m): ?>
     <tr>
-        <td style="border:1px solid #ccc; padding:8px; text-align:center;"><?= $match['id'] ?></td>
-        <td style="border:1px solid #ccc; padding:8px;"><?= htmlspecialchars($match['nom']) ?></td>
-        <td style="border:1px solid #ccc; padding:8px;"><?= htmlspecialchars($match['date']) ?></td>
-        <td style="border:1px solid #ccc; padding:8px; text-align:center;">
-            <a class="btn" href="index.php?controller=matchs&action=modifier&id=<?= $match['id'] ?>">Modifier</a>
-            <a class="btn" style="background:red;" href="index.php?controller=matchs&action=supprimer&id=<?= $match['id'] ?>">Supprimer</a>
+        <td><?= htmlspecialchars($m['idMatch']) ?></td>
+        <td><?= htmlspecialchars($m['dateMatch']) ?></td>
+        <td><?= htmlspecialchars($m['heureMatch']) ?></td>
+        <td><?= htmlspecialchars($m['nomEquipeAdverse']) ?></td>
+        <td><?= htmlspecialchars($m['lieuRencontre']) ?></td>
+        <td><?= htmlspecialchars($m['competition']) ?></td>
+        <td><?= $m['scoreEquipe'] !== null ? htmlspecialchars($m['scoreEquipe']) : '-' ?></td>
+        <td><?= $m['scoreEquipeAdverse'] !== null ? htmlspecialchars($m['scoreEquipeAdverse']) : '-' ?></td>
+        <td><?= $m['victoire'] == 1 ? 'Oui' : 'Non' ?></td>
+        <td><?= $m['matchNul'] == 1 ? 'Oui' : 'Non' ?></td>
+        <td>
+            <a class="btn" href="index.php?controller=matchs&action=modifier&id=<?= urlencode($m['idMatch']) ?>">Modifier</a>
+            <a class="btn" style="background:red;" href="index.php?controller=matchs&action=supprimer&id=<?= urlencode($m['idMatch']) ?>">Supprimer</a>
         </td>
     </tr>
     <?php endforeach; ?>
@@ -23,4 +37,4 @@
 <br>
 <a class="btn" href="index.php?controller=matchs&action=ajouter">Ajouter un match</a>
 
-<?php require_once "../views/layout/footer.php"; ?>
+<?php require_once __DIR__ . "/../layout/footer.php"; ?>

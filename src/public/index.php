@@ -1,14 +1,21 @@
 <?php
-session_start(); // Démarrage de la session
-
+session_start();
 require_once "../db_connect.php";
 require_once "../controllers/AuthController.php";
 require_once "../controllers/JoueursController.php";
 require_once "../controllers/MatchsController.php";
+require_once "../controllers/SelectionController.php";
+require_once "../controllers/StatsController.php";
 
 // Contrôleur et action par défaut
 $controllerName = isset($_GET['controller']) ? $_GET['controller'] : 'auth';
 $action = isset($_GET['action']) ? $_GET['action'] : 'login';
+
+// Vérification de l'authentification
+if ($controllerName !== 'auth' && !isset($_SESSION['user'])) {
+    header("Location: index.php?controller=auth&action=login");
+    exit();
+}
 
 // Instanciation du contrôleur
 switch ($controllerName) {
@@ -16,20 +23,16 @@ switch ($controllerName) {
         $controller = new AuthController();
         break;
     case 'joueurs':
-        // Vérifier si l'utilisateur est connecté
-        if (!isset($_SESSION['user'])) {
-            header("Location: index.php?controller=auth&action=login");
-            exit();
-        }
         $controller = new JoueursController();
         break;
     case 'matchs':
-        // Vérifier si l'utilisateur est connecté
-        if (!isset($_SESSION['user'])) {
-            header("Location: index.php?controller=auth&action=login");
-            exit();
-        }
         $controller = new MatchsController();
+        break;
+    case 'selection':
+        $controller = new SelectionController();
+        break;
+    case 'stats':
+        $controller = new StatsController();
         break;
     default:
         die("Contrôleur inconnu !");

@@ -1,15 +1,14 @@
 <?php
 class JoueursController {
     public function index() {
-        require_once "../models/JoueursModel.php";
+        require_once __DIR__ "../models/JoueursModel.php";
         $joueurs = JoueursModel::getAll();
-        require_once "../views/joueurs/index.php";
+        require_once __DIR__ "../views/joueurs/index.php";
     }
 
     public function ajouter() {
-        require_once "../models/JoueursModel.php";
+        require_once __DIR__ "/../models/JoueursModel.php";
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Récupérer les données du formulaire
             $data = [
                 'idJoueur' => $_POST['idJoueur'],
                 'nomJoueur' => $_POST['nomJoueur'],
@@ -20,25 +19,23 @@ class JoueursController {
                 'tailleJoueur' => $_POST['tailleJoueur'],
                 'poidsJoueur' => $_POST['poidsJoueur'],
                 'postePrincipal' => $_POST['postePrincipal'],
-                'victoire' => isset($_POST['victoire']) ? $_POST['victoire'] : null
+                'commentaire' => $_POST['commentaire']
             ];
             JoueursModel::create($data);
             header("Location: index.php?controller=joueurs&action=index");
             exit();
         }
-        require_once "../views/joueurs/ajouter.php";
+        require_once __DIR__ "../views/joueurs/ajouter.php";
     }
 
     public function modifier() {
-        require_once "../models/JoueursModel.php";
-        $id = isset($_GET['id']) ? $_GET['id'] : null;
-
-        if (!$id || !($joueur = JoueursModel::getById($id))) {
-            // Joueur introuvable ou ID invalide
+        require_once __DIR__ "../models/JoueursModel.php";
+        $id = $_GET['id'] ?? null;
+        $joueur = JoueursModel::getById($id);
+        if (!$joueur) {
             header("Location: index.php?controller=joueurs&action=index");
             exit();
         }
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
                 'nomJoueur' => $_POST['nomJoueur'],
@@ -49,19 +46,18 @@ class JoueursController {
                 'tailleJoueur' => $_POST['tailleJoueur'],
                 'poidsJoueur' => $_POST['poidsJoueur'],
                 'postePrincipal' => $_POST['postePrincipal'],
-                'victoire' => isset($_POST['victoire']) ? $_POST['victoire'] : null
+                'commentaire' => $_POST['commentaire']
             ];
             JoueursModel::update($id, $data);
             header("Location: index.php?controller=joueurs&action=index");
             exit();
         }
-
-        require_once "../views/joueurs/modifier.php";
+        require_once __DIR__ "../views/joueurs/modifier.php";
     }
 
     public function supprimer() {
-        require_once "../models/JoueursModel.php";
-        $id = isset($_GET['id']) ? $_GET['id'] : null;
+        require_once __DIR__ "../models/JoueursModel.php";
+        $id = $_GET['id'] ?? null;
         if ($id && JoueursModel::getById($id)) {
             JoueursModel::delete($id);
         }

@@ -25,21 +25,22 @@ try {
         tailleJoueur INT,
         poidsJoueur INT,
         postePrincipal VARCHAR(50),
-        victoire BOOLEAN
+        commentaire VARCHAR(50)
     );");
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS Matchs (
-        idMatch VARCHAR(50) PRIMARY KEY,
-        dateMatch DATE NOT NULL,
-        heureMatch TIME NOT NULL,
-        nomEquipeAdverse VARCHAR(50),
-        lieuRencontre VARCHAR(50),
-        competition VARCHAR(50),
-        scoreEquipe INT,
-        victoire BOOLEAN,
-        matchNul BOOLEAN,
-        scoreEquipeAdverse INT
-    );");
+    idMatch VARCHAR(50) PRIMARY KEY,
+    dateMatch DATE NOT NULL,
+    heureMatch TIME NOT NULL,
+    nomEquipeAdverse VARCHAR(50),
+    lieuRencontre VARCHAR(50),
+    competition VARCHAR(50),
+    scoreEquipe INT,
+    victoire TINYINT(1),
+    matchNul TINYINT(1),
+    scoreEquipeAdverse INT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+");
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS Participer (
         idJoueur VARCHAR(50),

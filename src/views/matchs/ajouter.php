@@ -1,10 +1,32 @@
-<?php require_once "../views/layout/header.php"; ?>
+<?php require_once __DIR__ . "/../layout/header.php"; ?>
 
 <h2>Ajouter un match</h2>
-<form action="index.php?controller=matchs&action=ajouter" method="POST" style="text-align:center;">
-    <input type="text" name="nom" placeholder="Nom du match" required style="padding:10px; width:300px;"><br><br>
-    <input type="date" name="date" required style="padding:10px; width:300px;"><br><br>
+<form action="index.php?controller=matchs&action=ajouter" method="POST" style="width:300px;margin:0 auto;">
+    <label>ID Match :</label><br>
+    <input type="text" name="idMatch" required><br><br>
+
+    <label>Date Match :</label><br>
+    <input type="date" name="dateMatch" required><br><br>
+
+    <label>Heure Match :</label><br>
+    <input type="time" name="heureMatch" required><br><br>
+
+    <label>Équipe Adverse :</label><br>
+    <input type="text" name="nomEquipeAdverse"><br><br>
+
+    <label>Lieu Rencontre :</label><br>
+    <input type="text" name="lieuRencontre"><br><br>
+
+    <label>Compétition :</label><br>
+    <input type="text" name="competition"><br><br>
+
+    <label>Score Équipe :</label><br>
+    <input type="number" name="scoreEquipe"><br><br>
+
+    <label>Score Équipe Adverse :</label><br>
+    <input type="number" name="scoreEquipeAdverse"><br><br>
+
     <button type="submit" class="btn">Ajouter</button>
 </form>
 
-<?php require_once "../views/layout/footer.php"; ?>
+<?php require_once __DIR__ . "/../layout/footer.php"; ?>

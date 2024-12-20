@@ -1,79 +1,36 @@
-<?php include "../includes/menu.php"; ?>
+<?php require_once __DIR__ . "/../layout/header.php"; ?>
 
-<h1>Modifier un Match</h1>
+<h2>Modifier un match</h2>
+<?php if (isset($match)): ?>
+<form action="index.php?controller=matchs&action=modifier&id=<?= urlencode($match['idMatch']) ?>" method="POST" style="width:300px;margin:0 auto;">
+    <label>ID Match (non modifiable) :</label><br>
+    <input type="text" value="<?= htmlspecialchars($match['idMatch']) ?>" disabled><br><br>
 
-<?php
-try {
-    $pdo = new PDO('mysql:host=host;dbname=database;charset=utf8', 'user', 'password');
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die('Erreur de connexion : ' . $e->getMessage());
-}
+    <label>Date Match :</label><br>
+    <input type="date" name="dateMatch" value="<?= htmlspecialchars($match['dateMatch']) ?>" required><br><br>
 
-if (isset($_GET['idMatch']) && ctype_digit($_GET['id'])) {
-    $idMatch = $_GET['idMatch'];
-    $query = "SELECT * FROM Matchs WHERE idMatch = :idMatch";
-    try {
-        $stmt = $pdo->prepare($query);
-        $stmt->execute(['idMatch' => $idMatch]);
-        $match = $stmt->fetch(PDO::FETCH_ASSOC);
+    <label>Heure Match :</label><br>
+    <input type="time" name="heureMatch" value="<?= htmlspecialchars($match['heureMatch']) ?>" required><br><br>
 
-        if (!$match) {
-            die("Aucun match trouvé pour cet ID.");
-        }
-    } catch (PDOException $e) {
-        die('Erreur lors de la récupération du match : ' . $e->getMessage());
-    }
-} else {
-    die("ID de match invalide.");
-}
+    <label>Équipe Adverse :</label><br>
+    <input type="text" name="nomEquipeAdverse" value="<?= htmlspecialchars($match['nomEquipeAdverse']) ?>"><br><br>
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $dateMatch = isset($_POST['dateMatch']) ? $_POST['dateMatch'] : '';
-    $heureMatch = isset($_POST['heureMatch']) ? $_POST['heureMatch'] : '';
-    $lieuRencontre = isset($_POST['lieuRencontre']) ? $_POST['lieuRencontre'] : '';
-    $nomEquipeAdverse = isset($_POST['nomEquipeAdverse']) ? $_POST['nomEquipeAdverse'] : '';
+    <label>Lieu Rencontre :</label><br>
+    <input type="text" name="lieuRencontre" value="<?= htmlspecialchars($match['lieuRencontre']) ?>"><br><br>
 
-    if (!empty($dateMatch) && !empty($heureMatch) && !empty($lieuRencontre) && !empty($nomEquipeAdverse)) {
-        $updateQuery = "
-            UPDATE Matchs
-            SET dateMatch = :dateMatch,
-                heureMatch = :heureMatch,
-                lieuRencontre = :lieuRencontre,
-                nomEquipeAdverse = :nomEquipeAdverse
-            WHERE idMatch = :idMatch
-        ";
-        try {
-            $stmt = $pdo->prepare($updateQuery);
-            $stmt->execute([
-                'dateMatch' => $dateMatch,
-                'heureMatch' => $heureMatch,
-                'lieuRencontre' => $lieuRencontre,
-                'nomEquipeAdverse' => $nomEquipeAdverse,
-                'idMatch' => $idMatch
-            ]);
-            echo "<p>Le match a été modifié avec succès.</p>";
-        } catch (PDOException $e) {
-            die('Erreur lors de la mise à jour : ' . $e->getMessage());
-        }
-    } else {
-        echo "<p>Tous les champs sont obligatoires.</p>";
-    }
-}
-?>
+    <label>Compétition :</label><br>
+    <input type="text" name="competition" value="<?= htmlspecialchars($match['competition']) ?>"><br><br>
 
-<form method="POST" action="index.php?controller=matchs&action=modifier&id=<?= htmlspecialchars($match['idMatch']) ?>">
-    <label>Date :</label>
-    <input type="date" name="dateMatch" value="<?= htmlspecialchars($match['dateMatch']) ?>" required><br>
+    <label>Score Équipe :</label><br>
+    <input type="number" name="scoreEquipe" value="<?= $match['scoreEquipe'] !== null ? htmlspecialchars($match['scoreEquipe']) : '' ?>"><br><br>
 
-    <label>Heure :</label>
-    <input type="time" name="heureMatch" value="<?= htmlspecialchars($match['heureMatch']) ?>" required><br>
+    <label>Score Équipe Adverse :</label><br>
+    <input type="number" name="scoreEquipeAdverse" value="<?= $match['scoreEquipeAdverse'] !== null ? htmlspecialchars($match['scoreEquipeAdverse']) : '' ?>"><br><br>
 
-    <label>Lieu :</label>
-    <input type="text" name="lieuRencontre" value="<?= htmlspecialchars($match['lieuRencontre']) ?>" required><br>
-
-    <label>Équipe Adverse :</label>
-    <input type="text" name="nomEquipeAdverse" value="<?= htmlspecialchars($match['nomEquipeAdverse']) ?>" required><br>
-
-    <button type="submit">Modifier</button>
+    <button type="submit" class="btn">Modifier</button>
 </form>
+<?php else: ?>
+<p>Match introuvable.</p>
+<?php endif; ?>
+
+<?php require_once __DIR__ . "../layout/footer.php"; ?>
