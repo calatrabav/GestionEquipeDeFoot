@@ -1,4 +1,5 @@
-<?php require_once "../layout/header.php"; ?>
+<?php require_once __DIR__ . "/../layout/header.php"; ?>
+
 
 <h2>Liste des joueurs</h2>
 <table style="width:100%; border-collapse: collapse;">
@@ -21,4 +22,5 @@
 <br>
 <a class="btn" href="index.php?controller=joueurs&action=ajouter">Ajouter un joueur</a>
 
-<?php require_once "../layout/footer.php"; ?>
+<?php require_once __DIR__ . "/../layout/footer.php"; ?>
+
