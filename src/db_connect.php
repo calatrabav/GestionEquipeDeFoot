@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$dbname = 'host';
+$dbname = 'GestionMatchs';
 $username = 'root';
 $password = '';
 
