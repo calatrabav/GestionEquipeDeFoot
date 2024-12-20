@@ -8,30 +8,53 @@ class JoueursModel {
     
     public static function getById($id) {
         global $pdo;
-        $stmt = $pdo->prepare("SELECT * FROM joueurs WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT * FROM Joueurs WHERE idJoueur = ?");
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public static function create($data) {
         global $pdo;
-        // On suppose que $data['nom'] est présent
-        $stmt = $pdo->prepare("INSERT INTO joueurs (nom) VALUES (?)");
-        $stmt->execute([$data['nom']]);
-        return $pdo->lastInsertId();
+        // On insère tous les champs, `idJoueur` doit être fourni ou généré.
+        // On supposera que l'utilisateur saisi un idJoueur unique ou qu'on génère un identifiant.
+        $stmt = $pdo->prepare("INSERT INTO Joueurs (idJoueur, nomJoueur, prenomJoueur, numLicence, statut, dateNaissanceJoueur, tailleJoueur, poidsJoueur, postePrincipal, victoire) 
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([
+            $data['idJoueur'],
+            $data['nomJoueur'],
+            $data['prenomJoueur'],
+            $data['numLicence'],
+            $data['statut'],
+            $data['dateNaissanceJoueur'],
+            $data['tailleJoueur'],
+            $data['poidsJoueur'],
+            $data['postePrincipal'],
+            isset($data['victoire']) ? 1 : 0
+        ]);
+        return $pdo->lastInsertId(); // ou retourner true, selon les besoins
     }
 
     public static function update($id, $data) {
         global $pdo;
-        // On suppose que $data['nom'] est présent
-        $stmt = $pdo->prepare("UPDATE joueurs SET nom = ? WHERE id = ?");
-        $stmt->execute([$data['nom'], $id]);
+        $stmt = $pdo->prepare("UPDATE Joueurs SET nomJoueur = ?, prenomJoueur = ?, numLicence = ?, statut = ?, dateNaissanceJoueur = ?, tailleJoueur = ?, poidsJoueur = ?, postePrincipal = ?, victoire = ? WHERE idJoueur = ?");
+        $stmt->execute([
+            $data['nomJoueur'],
+            $data['prenomJoueur'],
+            $data['numLicence'],
+            $data['statut'],
+            $data['dateNaissanceJoueur'],
+            $data['tailleJoueur'],
+            $data['poidsJoueur'],
+            $data['postePrincipal'],
+            isset($data['victoire']) ? 1 : 0,
+            $id
+        ]);
         return $stmt->rowCount() > 0;
     }
 
     public static function delete($id) {
         global $pdo;
-        $stmt = $pdo->prepare("DELETE FROM joueurs WHERE id = ?");
+        $stmt = $pdo->prepare("DELETE FROM Joueurs WHERE idJoueur = ?");
         $stmt->execute([$id]);
         return $stmt->rowCount() > 0;
     }
