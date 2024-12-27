@@ -2,7 +2,7 @@
 
 <h2>Statistiques</h2>
 
-<?php 
+<?php
 $victoires = $statsGlobales['victoires'];
 $nuls = $statsGlobales['nuls'];
 $defaites = $statsGlobales['defaites'];
@@ -24,6 +24,7 @@ $total = $statsGlobales['total'];
         <th>Remplacements</th>
         <th>Moy. Évaluation</th>
         <th>% Matchs Gagnés (avec lui)</th>
+        <th>Matchs Consécutifs</th>
     </tr>
     <?php foreach($joueurs as $j):
         $s = $statsJoueurs[$j['idJoueur']];
@@ -31,16 +32,18 @@ $total = $statsGlobales['total'];
         $wins = $s['wins'];
         $avgEval = $s['avgEval'];
         $winPercent = $totalMatches>0 ? round(($wins/$totalMatches)*100,2) : 0;
-    ?>
-    <tr>
-        <td><?= htmlspecialchars($j['nomJoueur']." ".$j['prenomJoueur']) ?></td>
-        <td><?= htmlspecialchars($j['statut']) ?></td>
-        <td><?= htmlspecialchars($j['postePrincipal']) ?></td>
-        <td><?= $s['titulaireCount'] ?></td>
-        <td><?= $s['remplacantCount'] ?></td>
-        <td><?= $avgEval ? round($avgEval,2) : '-' ?></td>
-        <td><?= $winPercent ?>%</td>
-    </tr>
+        $matchsConsecutifs = $s['matchs_consecutifs'];
+        ?>
+        <tr>
+            <td><?= htmlspecialchars($j['nomJoueur']." ".$j['prenomJoueur']) ?></td>
+            <td><?= htmlspecialchars($j['statut']) ?></td>
+            <td><?= htmlspecialchars($j['postePrincipal']) ?></td>
+            <td><?= $s['titulaireCount'] ?></td>
+            <td><?= $s['remplacantCount'] ?></td>
+            <td><?= $avgEval ? round($avgEval,2) : '-' ?></td>
+            <td><?= $winPercent ?>%</td>
+            <td><?= $matchsConsecutifs ?></td>
+        </tr>
     <?php endforeach; ?>
 </table>
 

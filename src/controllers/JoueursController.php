@@ -1,13 +1,13 @@
 <?php
 class JoueursController {
     public function index() {
-        require_once __DIR__ "../models/JoueursModel.php";
+        require_once "../models/JoueursModel.php";
         $joueurs = JoueursModel::getAll();
-        require_once __DIR__ "../views/joueurs/index.php";
+        require_once  "../views/joueurs/index.php";
     }
 
     public function ajouter() {
-        require_once __DIR__ "/../models/JoueursModel.php";
+        require_once "../models/JoueursModel.php";
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
                 'idJoueur' => $_POST['idJoueur'],
@@ -25,11 +25,11 @@ class JoueursController {
             header("Location: index.php?controller=joueurs&action=index");
             exit();
         }
-        require_once __DIR__ "../views/joueurs/ajouter.php";
+        require_once "../views/joueurs/ajouter.php";
     }
 
     public function modifier() {
-        require_once __DIR__ "../models/JoueursModel.php";
+        require_once  "../models/JoueursModel.php";
         $id = $_GET['id'] ?? null;
         $joueur = JoueursModel::getById($id);
         if (!$joueur) {
@@ -52,11 +52,11 @@ class JoueursController {
             header("Location: index.php?controller=joueurs&action=index");
             exit();
         }
-        require_once __DIR__ "../views/joueurs/modifier.php";
+        require_once  "../views/joueurs/modifier.php";
     }
 
     public function supprimer() {
-        require_once __DIR__ "../models/JoueursModel.php";
+        require_once  "../models/JoueursModel.php";
         $id = $_GET['id'] ?? null;
         if ($id && JoueursModel::getById($id)) {
             JoueursModel::delete($id);

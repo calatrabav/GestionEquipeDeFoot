@@ -1,4 +1,4 @@
-<?php require_once __DIR__ "../layout/header.php"; ?>
+<?php require_once __DIR__ . "/../layout/header.php"; ?>
 
 <h2>Ajouter un joueur</h2>
 <form action="index.php?controller=joueurs&action=ajouter" method="POST" style="width:300px;margin:0 auto;">
@@ -40,4 +40,4 @@
     <button type="submit" class="btn">Ajouter</button>
 </form>
 
-<?php require_once "../layout/footer.php"; ?>
+<?php require_once __DIR__ . "/../layout/footer.php"; ?>
