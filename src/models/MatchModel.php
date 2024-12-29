@@ -22,16 +22,17 @@ class MatchModel {
     public static function create($data) {
         global $pdo;
         $stmt = $pdo->prepare("INSERT INTO Matchs (idMatch, dateMatch, heureMatch, nomEquipeAdverse, lieuRencontre, competition, scoreEquipe, scoreEquipeAdverse, victoire, matchNul)
-        VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, 0, 0)");
+    VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, 0, 0)");
         $stmt->execute([
             $data['idMatch'],
             $data['dateMatch'],
             $data['heureMatch'],
             $data['nomEquipeAdverse'],
-            $data['lieuRencontre'],
+            $data['lieuRencontre'], // La valeur de 'lieuRencontre' est déjà récupérée du formulaire
             $data['competition']
         ]);
     }
+
 
     public static function update($id, $data) {
         global $pdo;
@@ -40,11 +41,12 @@ class MatchModel {
             $data['dateMatch'],
             $data['heureMatch'],
             $data['nomEquipeAdverse'],
-            $data['lieuRencontre'],
+            $data['lieuRencontre'], // Mise à jour du 'lieuRencontre'
             $data['competition'],
             $id
         ]);
     }
+
 
     public static function delete($id) {
         global $pdo;

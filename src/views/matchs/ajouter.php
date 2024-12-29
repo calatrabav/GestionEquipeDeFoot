@@ -15,7 +15,10 @@
     <input type="text" name="nomEquipeAdverse"><br><br>
 
     <label>Lieu Rencontre :</label><br>
-    <input type="text" name="lieuRencontre"><br><br>
+    <select name="lieuRencontre" required>
+        <option value="Domicile" <?= isset($match['lieuRencontre']) && $match['lieuRencontre'] == 'domicile' ? 'selected' : '' ?>>Domicile</option>
+        <option value="Extérieur" <?= isset($match['lieuRencontre']) && $match['lieuRencontre'] == 'extérieur' ? 'selected' : '' ?>>Extérieur</option>
+    </select><br><br>
 
     <label>Compétition :</label><br>
     <input type="text" name="competition"><br><br>
