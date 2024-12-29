@@ -79,7 +79,10 @@ if($idMatch !== null){
                     <td><?= htmlspecialchars($j['postePrincipal'] ?? '') ?></td>
                     <td><?= htmlspecialchars($j['commentaire'] ?? '') ?></td>
                     <td>
-                        <input type="checkbox" name="selection[<?= $idJoueur ?>][titulaire]" <?= isset($selectedPlayersDetails[$idJoueur]['titulaire']) && $selectedPlayersDetails[$idJoueur]['titulaire'] ? 'checked' : '' ?>>
+                        <!-- Champ caché qui enverra 0 si la case n'est pas cochée -->
+                        <input type="hidden" name="selection[<?= $idJoueur ?>][titulaire]" value="0">
+                        <!-- Case à cocher pour envoyer 1 si elle est cochée -->
+                        <input type="checkbox" name="selection[<?= $idJoueur ?>][titulaire]" value="1" <?= isset($selectedPlayersDetails[$idJoueur]['titulaire']) && $selectedPlayersDetails[$idJoueur]['titulaire'] ? 'checked' : '' ?>>
                     </td>
                     <td>
                         <input type="text" name="selection[<?= $idJoueur ?>][poste]" value="<?= htmlspecialchars($selectedPlayersDetails[$idJoueur]['poste'] ?? '') ?>">
@@ -99,9 +102,7 @@ if($idMatch !== null){
         <button type="submit" class="btn">Valider la sélection</button>
     </form>
 
-    <?php if (empty($selectedPlayersDetails)): ?>
-        <p>Aucun joueur n'a encore été sélectionné pour ce match.</p>
-    <?php else: ?>
+    <?php if(!empty($selectedPlayersDetails)): ?>
         <h2>Joueurs Sélectionnés</h2>
         <table border="1">
             <tr>
@@ -154,8 +155,16 @@ if($idMatch !== null){
                 </tr>
             <?php endforeach; ?>
         </table>
+    <form method="POST" style="margin-top: 20px;">
+        <input type="hidden" name="idMatch" value="<?= htmlspecialchars($idMatch) ?>">
+        <input type="hidden" name="action" value="removeAllPlayers">
+        <button type="submit" class="btn btn-danger" id="removeAllBtn">Retirer tous les joueurs</button>
+    </form>
+    <?php else: ?>
+        <p>Aucun joueur n'est encore sélectionné pour ce match.</p>
     <?php endif; ?>
 <?php endif; ?>
+
 
 <script>
     function enableEditing(button) {

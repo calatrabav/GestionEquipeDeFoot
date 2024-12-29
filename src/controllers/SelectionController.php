@@ -28,6 +28,13 @@ class SelectionController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? null;
 
+            if ($action === 'removeAllPlayers') {
+                if ($idMatch) {
+                    ParticiperModel::deleteAllParticipants($idMatch);
+                    $selectedPlayersDetails = [];
+                }
+            }
+
             if ($action === 'removePlayer') {
                 // Supprimer un joueur de la table "Participer"
                 $idJoueur = $_POST['idJoueur'] ?? null;
@@ -45,8 +52,7 @@ class SelectionController {
                 $titulaire = isset($_POST['titulaire']) ? (int) $_POST['titulaire'] : 0;
 
                 if ($idMatch && $idJoueur) {
-                    ParticiperModel::updateParticipant($idMatch, $idJoueur, $poste, $commentaire);
-                    ParticiperModel::updateTitulaire($idMatch, $idJoueur, $titulaire);
+                    ParticiperModel::updateParticipant($idMatch, $idJoueur,$titulaire, $poste, $commentaire);
                 }
 
                 // Mettre à jour la liste des joueurs sélectionnés
@@ -63,13 +69,11 @@ class SelectionController {
                         ParticiperModel::replaceParticipant($idMatch, $idJoueurARemplacer, $idJoueur, $titulaire, $poste, $commentaire);
                         $selectedPlayersDetails = ParticiperModel::getParticipants($idMatch);
                         $joueursNonParticipants = ParticiperModel::getNonParticipants($idMatch);
-                    } else {
-                        $error = "Tous les champs doivent être remplis pour effectuer le remplacement.";
                     }
                 } catch (Exception $e) {
                     $error = $e->getMessage();
                 }
-            }else {
+            } else {
                 // Logique pour ajouter ou modifier des joueurs
                 $selection = $_POST['selection'] ?? [];
 
@@ -79,7 +83,7 @@ class SelectionController {
                     foreach ($selection as $idJoueur => $details) {
                         $poste = $details['poste'] ?? '';
                         $commentaireStaff = $details['commentaire'] ?? null;
-                        $titulaire = $details['titulaire'] ?? 0;
+                        $titulaire = isset($details['titulaire']) && $details['titulaire'] === '1' ? 1 : 0;
 
                         if (isset($details['selected']) && $details['selected'] == 'on') {
                             ParticiperModel::insertParticipant($idMatch, $idJoueur, $titulaire, $poste, $commentaireStaff);

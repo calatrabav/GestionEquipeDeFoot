@@ -2,7 +2,7 @@
 class ParticiperModel {
     public static function getParticipants($idMatch) {
         global $pdo;
-        $stmt = $pdo->prepare("
+        $query = "
         SELECT 
             p.idJoueur,
             j.nomJoueur,
@@ -13,7 +13,8 @@ class ParticiperModel {
         FROM Participer p
         JOIN Joueurs j ON p.idJoueur = j.idJoueur
         WHERE p.idMatch = ?
-    ");
+    ";
+        $stmt = $pdo->prepare($query);
         $stmt->execute([$idMatch]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -28,11 +29,11 @@ class ParticiperModel {
         return $result['count'] > 0; // Retourne true si des joueurs sont associés au match
     }
 
-    public static function updateParticipant($idMatch, $idJoueur, $poste, $commentaire) {
+    public static function updateParticipant($idMatch, $idJoueur, $titulaire, $poste, $commentaire) {
         global $pdo;
-        $query = "UPDATE Participer SET poste = ?, commentaire = ? WHERE idMatch = ? AND idJoueur = ?";
+        $query = "UPDATE Participer SET titulaire = ?, poste = ?, commentaire = ? WHERE idMatch = ? AND idJoueur = ?";
         $stmt = $pdo->prepare($query);
-        $stmt->execute([$poste, $commentaire, $idMatch, $idJoueur]);
+        $stmt->execute([$titulaire, $poste, $commentaire, $idMatch, $idJoueur]);
     }
 
     public static function deleteParticipant($idMatch, $idJoueur) {
@@ -71,6 +72,14 @@ class ParticiperModel {
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public static function deleteAllParticipants($idMatch)
+    {
+        global $pdo;
+        $query = "DELETE FROM Participer WHERE idMatch = ?";
+        $stmt = $pdo->prepare($query);
+        $stmt->execute([$idMatch]);
+    }
+
     public static function replaceParticipant($idMatch, $idJoueurARemplacer, $idJoueur, $titulaire, $poste, $commentaire) {
         global $pdo;
 
@@ -129,14 +138,6 @@ class ParticiperModel {
         $query = "DELETE FROM Participer WHERE idMatch=?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idMatch]);
-    }
-
-    public static function updateTitulaire($idMatch, $idJoueur, $titulaire) {
-        global $pdo;
-        // Mise à jour de l'attribut 'titulaire' pour un joueur
-        $query = "UPDATE Participer SET titulaire = ? WHERE idMatch = ? AND idJoueur = ?";
-        $stmt = $pdo->prepare($query);
-        $stmt->execute([$titulaire, $idMatch, $idJoueur]);
     }
 
     public static function getConsecutiveMatchCount($idJoueur) {
