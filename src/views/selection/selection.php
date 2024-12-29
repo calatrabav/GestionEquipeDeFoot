@@ -49,7 +49,7 @@ if($idMatch !== null){
     <h3>Joueurs Actifs</h3>
     <form method="POST">
         <input type="hidden" name="idMatch" value="<?= htmlspecialchars($idMatch) ?>">
-        <button type="button" id="toggleSelectButton" class="btn">Sélectionner tous les joueurs</button>
+        <button type="button" id="selectAllBtn" class="btn">Sélectionner tous les joueurs</button>
         <table>
             <tr>
                 <th>Sélection</th>
@@ -135,10 +135,10 @@ if($idMatch !== null){
                         <!-- Bouton pour remplacer un joueur -->
                         <form method="POST" style="display:inline;">
                             <input type="hidden" name="idMatch" value="<?= htmlspecialchars($idMatch) ?>">
-                            <input type="hidden" name="idJoueurToRemove" value="<?= htmlspecialchars($player['idJoueur']) ?>">
+                            <input type="hidden" name="idJoueurARemplacer" value="<?= htmlspecialchars($player['idJoueur']) ?>">
                             <label for="idJoueurToAdd">Remplacer par :</label>
                             <label>
-                                <select name="idJoueurToAdd" required>
+                                <select name="idJoueur" required>
                                     <?php
                                     foreach ($joueursActifsNonParticipants  as $j): ?>
                                         <option value="<?= htmlspecialchars($j['idJoueur']) ?>">
@@ -234,6 +234,27 @@ if($idMatch !== null){
         checkboxes.forEach(checkbox => {
             checkbox.checked = !allChecked; // Si toutes sont cochées, on les décoche, sinon on les coche
         });
+
+        // Modifier le texte du bouton en fonction de l'état des cases
+        const button = document.getElementById('selectAllBtn');
+        if (allChecked) {
+            button.textContent = 'Sélectionner tous les joueurs'; // Si tous les joueurs étaient sélectionnés, changer le texte
+        } else {
+            button.textContent = 'Désélectionner tous les joueurs'; // Si ce n'était pas le cas, changer le texte
+        }
     });
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function (event) {
+            const idJoueurARemplacer = form.querySelector('input[name="idJoueurARemplacer"]');
+            const idJoueur = form.querySelector('select[name="idJoueur"]');
+
+            if (idJoueurARemplacer && idJoueur && idJoueur.value === '') {
+                event.preventDefault();
+                alert("Veuillez sélectionner un joueur valide pour le remplacement.");
+            }
+        });
+    });
+
+
 </script>
 <?php require_once __DIR__ . "/../layout/footer.php"; ?>
