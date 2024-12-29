@@ -42,19 +42,39 @@ class SelectionController {
                 $idJoueur = $_POST['idJoueur'] ?? null;
                 $poste = trim($_POST['poste'] ?? '');
                 $commentaire = trim($_POST['commentaire'] ?? '');
+                $titulaire = isset($_POST['titulaire']) ? (int) $_POST['titulaire'] : 0;
 
                 if ($idMatch && $idJoueur) {
                     ParticiperModel::updateParticipant($idMatch, $idJoueur, $poste, $commentaire);
+                    ParticiperModel::updateTitulaire($idMatch, $idJoueur, $titulaire);
                 }
 
                 // Mettre à jour la liste des joueurs sélectionnés
                 $selectedPlayersDetails = ParticiperModel::getParticipants($idMatch);
-            } else {
+            } elseif ($action === 'replacePlayer') {
+                $idJoueurARemplacer = $_POST['idJoueurARemplacer'] ?? null;
+                $idJoueur = $_POST['idJoueur'] ?? null;
+                $titulaire = $_POST['titulaire'] ?? 0;
+                $poste = $_POST['poste'] ?? '';
+                $commentaire = $_POST['commentaire'] ?? '';
+
+                try {
+                    if ($idMatch && $idJoueurARemplacer && $idJoueur) {
+                        ParticiperModel::replaceParticipant($idMatch, $idJoueurARemplacer, $idJoueur, $titulaire, $poste, $commentaire);
+                        $selectedPlayersDetails = ParticiperModel::getParticipants($idMatch);
+                        $joueursNonParticipants = ParticiperModel::getNonParticipants($idMatch);
+                    } else {
+                        $error = "Tous les champs doivent être remplis pour effectuer le remplacement.";
+                    }
+                } catch (Exception $e) {
+                    $error = $e->getMessage();
+                }
+            }else {
                 // Logique pour ajouter ou modifier des joueurs
                 $selection = $_POST['selection'] ?? [];
 
-                if (count($selection) != 11) {
-                    $error = 'Vous devez sélectionner 11 joueurs.';
+                if (count($selection) <= 11 || count($selection) > 16) {
+                    $error = 'Vous devez sélectionner entre 11 et 16 joueurs.';
                 } else {
                     foreach ($selection as $idJoueur => $details) {
                         $poste = $details['poste'] ?? '';
@@ -71,22 +91,6 @@ class SelectionController {
                     // Mettre à jour la liste des joueurs sélectionnés après modification
                     $selectedPlayersDetails = ParticiperModel::getParticipants($idMatch);
                 }
-            }
-        }
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $action = $_POST['action'] ?? null;
-            if ($action === 'updatePlayer') {
-                // Mettre à jour les informations d'un joueur
-                $idJoueur = $_POST['idJoueur'] ?? null;
-                $poste = $_POST['poste'] ?? null;
-                $commentaire = $_POST['commentaire'] ?? null;
-
-                if ($idJoueur && $poste !== null) {
-                    ParticiperModel::updateParticipant($idMatch, $idJoueur, $poste, $commentaire);
-                }
-
-                // Rafraîchir les joueurs sélectionnés
-                $selectedPlayersDetails = ParticiperModel::getParticipants($idMatch);
             }
         }
 

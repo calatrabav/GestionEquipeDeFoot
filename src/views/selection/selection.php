@@ -19,6 +19,9 @@ $selectedPlayersDetails = [];
 if ($idMatch !== null) {
     $selectedPlayersDetails = ParticiperModel::getParticipants($idMatch);
 }
+if($idMatch !== null){
+    $joueursActifsNonParticipants = ParticiperModel::getNonParticipants($idMatch);
+}
 ?>
 
 <h2>Feuille de Match</h2>
@@ -104,6 +107,7 @@ if ($idMatch !== null) {
             <tr>
                 <th>Nom</th>
                 <th>Prénom</th>
+                <th>Titulaire ?</th>
                 <th>Poste</th>
                 <th>Commentaire Staff</th>
                 <th>Action</th>
@@ -112,6 +116,11 @@ if ($idMatch !== null) {
                 <tr>
                     <td><?= htmlspecialchars($player['nomJoueur']) ?></td>
                     <td><?= htmlspecialchars($player['prenomJoueur']) ?></td>
+                    <td>
+                        <label>
+                            <input type="checkbox" class="editableTitulaire" name="titulaire[<?= $player['idJoueur'] ?>]" <?= $player['titulaire'] ? 'checked' : '' ?> disabled>
+                        </label>
+                    </td>
                     <td contenteditable="false" class="editable poste"><?= htmlspecialchars($player['poste']) ?></td>
                     <td contenteditable="false" class="editable commentaire"><?= htmlspecialchars($player['commentaire']) ?></td>
                     <td>
@@ -121,6 +130,25 @@ if ($idMatch !== null) {
                             <input type="hidden" name="idJoueur" value="<?= htmlspecialchars($player['idJoueur']) ?>">
                             <input type="hidden" name="action" value="removePlayer">
                             <button type="submit" class="btn btn-danger">Retirer</button>
+                        </form>
+
+                        <!-- Bouton pour remplacer un joueur -->
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="idMatch" value="<?= htmlspecialchars($idMatch) ?>">
+                            <input type="hidden" name="idJoueurToRemove" value="<?= htmlspecialchars($player['idJoueur']) ?>">
+                            <label for="idJoueurToAdd">Remplacer par :</label>
+                            <label>
+                                <select name="idJoueurToAdd" required>
+                                    <?php
+                                    foreach ($joueursActifsNonParticipants  as $j): ?>
+                                        <option value="<?= htmlspecialchars($j['idJoueur']) ?>">
+                                            <?= htmlspecialchars($j['nomJoueur'] . ' ' . $j['prenomJoueur']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                            <input type="hidden" name="action" value="replacePlayer">
+                            <button type="submit" class="btn btn-warning">Remplacer</button>
                         </form>
                     </td>
                 </tr>
@@ -133,18 +161,24 @@ if ($idMatch !== null) {
     function enableEditing(button) {
         const row = button.closest("tr");
         const editableCells = row.querySelectorAll(".editable");
+        const editableTitulaire = row.querySelector(".editableTitulaire");
+
 
         // Rendre les cellules éditables
         editableCells.forEach(cell => {
             cell.contentEditable = true;
             cell.style.backgroundColor = "#f0f8ff"; // Indicate editing
         });
+        editableTitulaire.disabled = false;
+        editableTitulaire.style.backgroundColor = "#f0f8ff"; // Indicate editing
+
 
         button.textContent = "Enregistrer";
         button.onclick = function () {
             // Collecter les données modifiées
             const idMatch = <?= json_encode($idMatch) ?>;
             const idJoueur = row.querySelector("input[name='idJoueur']").value;
+            const titulaire = editableTitulaire.checked ? 1 : 0;
             const poste = row.querySelector(".poste").textContent;
             const commentaire = row.querySelector(".commentaire").textContent;
 
@@ -160,6 +194,7 @@ if ($idMatch !== null) {
                     idJoueur: idJoueur,
                     poste: poste,
                     commentaire: commentaire,
+                    titulaire: titulaire
                 }),
             })
                 .then(response => response.text())
@@ -172,6 +207,9 @@ if ($idMatch !== null) {
                         cell.contentEditable = false;
                         cell.style.backgroundColor = ""; // Reset background color
                     });
+                    editableTitulaire.disabled = true;
+                    editableTitulaire.style.backgroundColor = ""; // Reset background color
+
 
                     // Réinitialiser le bouton
                     button.textContent = "Modifier";
@@ -184,5 +222,18 @@ if ($idMatch !== null) {
                 });
         };
     }
+    // Fonction pour sélectionner ou désélectionner tous les joueurs
+    document.getElementById('selectAllBtn').addEventListener('click', function() {
+        // Récupérer toutes les cases à cocher des joueurs
+        const checkboxes = document.querySelectorAll('input[name^="selection["]');
+
+        // Vérifier si toutes les cases sont déjà cochées
+        const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+
+        // Cocher/décocher toutes les cases
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = !allChecked; // Si toutes sont cochées, on les décoche, sinon on les coche
+        });
+    });
 </script>
 <?php require_once __DIR__ . "/../layout/footer.php"; ?>
