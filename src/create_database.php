@@ -222,9 +222,7 @@ try {
     $insertUsers = "
         INSERT INTO users (username, password)
         VALUES
-            ('admin', 'adminpass'),
-            ('coach', 'coachpass'),
-            ('player', 'playerpass')
+            ('admin', 'admin')
     ";
 
     // Exécution pas à pas (pour traquer une éventuelle erreur)
