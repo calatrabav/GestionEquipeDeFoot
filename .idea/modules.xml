@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/GestionEquipeDeFootRepo.iml" filepath="$PROJECT_DIR$/.idea/GestionEquipeDeFootRepo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/GestionEquipeDeFootGit.iml" filepath="$PROJECT_DIR$/.idea/GestionEquipeDeFootGit.iml" />
     </modules>
   </component>
 </project>
