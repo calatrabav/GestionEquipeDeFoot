@@ -18,8 +18,8 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // On force la suppression puis recréation de la base (optionnel)
-    $pdo->exec("DROP DATABASE IF EXISTS gestion_matchs");
-    $pdo->exec("CREATE DATABASE gestion_matchs CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci");
+    $pdo->exec("DROP DATABASE IF EXISTS pigneaux_bdoracle");
+    $pdo->exec("CREATE DATABASE pigneaux_bdoracle CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci");
     $pdo->exec("USE gestion_matchs");
 
     // Liste de requêtes de création de tables

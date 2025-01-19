@@ -2,26 +2,26 @@
 class MatchModel {
     public static function getAll() {
         global $pdo;
-        $stmt = $pdo->query("SELECT * FROM Matchs ORDER BY dateMatch ASC");
+        $stmt = $pdo->query("SELECT * FROM matchs ORDER BY dateMatch ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function getById($id) {
         global $pdo;
-        $stmt = $pdo->prepare("SELECT * FROM Matchs WHERE idMatch=?");
+        $stmt = $pdo->prepare("SELECT * FROM matchs WHERE idMatch=?");
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public static function getFuturs() {
         global $pdo;
-        $stmt = $pdo->query("SELECT * FROM Matchs WHERE dateMatch >= CURDATE() ORDER BY dateMatch ASC");
+        $stmt = $pdo->query("SELECT * FROM matchs WHERE dateMatch >= CURDATE() ORDER BY dateMatch ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function create($data) {
         global $pdo;
-        $stmt = $pdo->prepare("INSERT INTO Matchs (idMatch, dateMatch, heureMatch, nomEquipeAdverse, lieuRencontre, competition, scoreEquipe, scoreEquipeAdverse, victoire, matchNul)
+        $stmt = $pdo->prepare("INSERT INTO matchs (idMatch, dateMatch, heureMatch, nomEquipeAdverse, lieuRencontre, competition, scoreEquipe, scoreEquipeAdverse, victoire, matchNul)
     VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, 0, 0)");
         $stmt->execute([
             $data['idMatch'],
@@ -36,7 +36,7 @@ class MatchModel {
 
     public static function update($id, $data) {
         global $pdo;
-        $stmt = $pdo->prepare("UPDATE Matchs SET dateMatch=?, heureMatch=?, nomEquipeAdverse=?, lieuRencontre=?, competition=? WHERE idMatch=?");
+        $stmt = $pdo->prepare("UPDATE matchs SET dateMatch=?, heureMatch=?, nomEquipeAdverse=?, lieuRencontre=?, competition=? WHERE idMatch=?");
         $stmt->execute([
             $data['dateMatch'],
             $data['heureMatch'],
@@ -50,7 +50,7 @@ class MatchModel {
 
     public static function delete($id) {
         global $pdo;
-        $stmt = $pdo->prepare("DELETE FROM Matchs WHERE idMatch=?");
+        $stmt = $pdo->prepare("DELETE FROM matchs WHERE idMatch=?");
         $stmt->execute([$id]);
     }
 
@@ -67,7 +67,7 @@ class MatchModel {
         // Si pas victoire ni nul, c'est défaite
         // On n'a pas de colonne pour défaite, juste victoire=0 et matchNul=0.
 
-        $stmt = $pdo->prepare("UPDATE Matchs SET scoreEquipe=?, scoreEquipeAdverse=?, victoire=?, matchNul=? WHERE idMatch=?");
+        $stmt = $pdo->prepare("UPDATE matchs SET scoreEquipe=?, scoreEquipeAdverse=?, victoire=?, matchNul=? WHERE idMatch=?");
         $stmt->execute([$scoreEquipe, $scoreEquipeAdverse, $victoire, $matchNul, $idMatch]);
     }
 
@@ -81,7 +81,7 @@ class MatchModel {
             SUM(CASE WHEN victoire=1 THEN 1 ELSE 0 END) AS victoires,
             SUM(CASE WHEN matchNul=1 THEN 1 ELSE 0 END) AS nuls,
             COUNT(*) AS total
-        FROM Matchs
+        FROM matchs
         WHERE scoreEquipe IS NOT NULL AND scoreEquipeAdverse IS NOT NULL");
         $res = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -104,8 +104,8 @@ class MatchModel {
             SUM(CASE WHEN titulaire=0 THEN 1 ELSE 0 END) AS remplacantCount,
             SUM(CASE WHEN m.victoire=1 THEN 1 ELSE 0 END) AS wins,
             SUM(CASE WHEN m.matchNul=1 THEN 1 ELSE 0 END) AS draws
-        FROM Participer p
-        JOIN Matchs m ON p.idMatch=m.idMatch
+        FROM participer p
+        JOIN matchs m ON p.idMatch=m.idMatch
         WHERE p.idJoueur=? 
           AND m.scoreEquipe IS NOT NULL 
           AND m.scoreEquipeAdverse IS NOT NULL");

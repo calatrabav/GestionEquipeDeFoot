@@ -1,8 +1,8 @@
 <?php
-class JoueursModel {
+class joueursModel {
     public static function getAll() {
         global $pdo;
-        $stmt = $pdo->query("SELECT * FROM Joueurs ORDER BY idJoueur ASC");
+        $stmt = $pdo->query("SELECT * FROM joueurs ORDER BY idJoueur ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     public static function getSelectedPlayers($idMatch) {
@@ -35,14 +35,14 @@ class JoueursModel {
 
     public static function getById($id) {
         global $pdo;
-        $stmt = $pdo->prepare("SELECT * FROM Joueurs WHERE idJoueur=?");
+        $stmt = $pdo->prepare("SELECT * FROM joueurs WHERE idJoueur=?");
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public static function create($data) {
         global $pdo;
-        $stmt = $pdo->prepare("INSERT INTO Joueurs (idJoueur, nomJoueur, prenomJoueur, numLicence, statut, dateNaissanceJoueur, tailleJoueur, poidsJoueur, postePrincipal, commentaire) 
+        $stmt = $pdo->prepare("INSERT INTO joueurs (idJoueur, nomJoueur, prenomJoueur, numLicence, statut, dateNaissanceJoueur, tailleJoueur, poidsJoueur, postePrincipal, commentaire) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $data['idJoueur'],
@@ -60,7 +60,7 @@ class JoueursModel {
 
     public static function update($id, $data) {
         global $pdo;
-        $stmt = $pdo->prepare("UPDATE Joueurs SET nomJoueur=?, prenomJoueur=?, numLicence=?, statut=?, dateNaissanceJoueur=?, tailleJoueur=?, poidsJoueur=?, postePrincipal=?, commentaire=? WHERE idJoueur=?");
+        $stmt = $pdo->prepare("UPDATE joueurs SET nomJoueur=?, prenomJoueur=?, numLicence=?, statut=?, dateNaissanceJoueur=?, tailleJoueur=?, poidsJoueur=?, postePrincipal=?, commentaire=? WHERE idJoueur=?");
         $stmt->execute([
             $data['nomJoueur'],
             $data['prenomJoueur'],
@@ -77,13 +77,13 @@ class JoueursModel {
 
     public static function delete($id) {
         global $pdo;
-        $stmt = $pdo->prepare("DELETE FROM Joueurs WHERE idJoueur=?");
+        $stmt = $pdo->prepare("DELETE FROM joueurs WHERE idJoueur=?");
         $stmt->execute([$id]);
     }
 
     public static function getActifs() {
         global $pdo;
-        $stmt = $pdo->prepare("SELECT * FROM Joueurs WHERE statut='Actif' ORDER BY nomJoueur ASC");
+        $stmt = $pdo->prepare("SELECT * FROM joueurs WHERE statut='Actif' ORDER BY nomJoueur ASC");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

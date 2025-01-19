@@ -1,5 +1,5 @@
 <?php
-class ParticiperModel {
+class participerModel {
     public static function getParticipants($idMatch) {
         global $pdo;
         $query = "
@@ -10,7 +10,7 @@ class ParticiperModel {
             p.titulaire,
             p.poste,
             p.commentaire
-        FROM Participer p
+        FROM participer p
         JOIN Joueurs j ON p.idJoueur = j.idJoueur
         WHERE p.idMatch = ?
     ";
@@ -21,7 +21,7 @@ class ParticiperModel {
 
     public static function hasParticipants($idMatch) {
         global $pdo;
-        $query = "SELECT COUNT(*) AS count FROM Participer WHERE idMatch = ?";
+        $query = "SELECT COUNT(*) AS count FROM participer WHERE idMatch = ?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idMatch]);
 
@@ -31,22 +31,22 @@ class ParticiperModel {
 
     public static function updateParticipant($idMatch, $idJoueur, $titulaire, $poste, $commentaire) {
         global $pdo;
-        $query = "UPDATE Participer SET titulaire = ?, poste = ?, commentaire = ? WHERE idMatch = ? AND idJoueur = ?";
+        $query = "UPDATE participer SET titulaire = ?, poste = ?, commentaire = ? WHERE idMatch = ? AND idJoueur = ?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$titulaire, $poste, $commentaire, $idMatch, $idJoueur]);
     }
 
     public static function deleteParticipant($idMatch, $idJoueur) {
-        // Code pour supprimer le joueur de la table "Participer"
+        // Code pour supprimer le joueur de la table "participer"
         global $pdo;
-        $query = "DELETE FROM Participer WHERE idMatch = ? AND idJoueur = ?";
+        $query = "DELETE FROM participer WHERE idMatch = ? AND idJoueur = ?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idMatch, $idJoueur]);
     }
 
     public static function getParticipantById($idMatch, $idJoueur) {
         global $pdo;
-        $query = "SELECT * FROM Participer 
+        $query = "SELECT * FROM participer 
             WHERE idMatch = ? AND idJoueur = ?
         ";
         $stmt = $pdo->prepare($query);
@@ -56,14 +56,14 @@ class ParticiperModel {
 
     public static function getNonParticipants($idMatch) {
         global $pdo;
-        // Requête pour sélectionner les joueurs qui ne sont pas dans Participer pour ce match
+        // Requête pour sélectionner les joueurs qui ne sont pas dans participer pour ce match
         $sql = "
             SELECT j.idJoueur, nomJoueur, prenomJoueur
             FROM Joueurs j
             WHERE j.statut = 'Actif'
               AND NOT EXISTS (
                 SELECT *
-                FROM Participer p 
+                FROM participer p 
                 WHERE p.idJoueur = j.idJoueur AND p.idMatch = ?
               )
         ";
@@ -75,7 +75,7 @@ class ParticiperModel {
     public static function deleteAllParticipants($idMatch)
     {
         global $pdo;
-        $query = "DELETE FROM Participer WHERE idMatch = ?";
+        $query = "DELETE FROM participer WHERE idMatch = ?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idMatch]);
     }
@@ -84,7 +84,7 @@ class ParticiperModel {
         global $pdo;
 
         // Vérifier si le joueur à ajouter ne participe pas déjà au match
-        $sql = "SELECT COUNT(*) as count FROM Participer WHERE idMatch = ? AND idJoueur = ?";
+        $sql = "SELECT COUNT(*) as count FROM participer WHERE idMatch = ? AND idJoueur = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$idMatch, $idJoueur]);
         $result = $stmt->fetch();
@@ -94,12 +94,12 @@ class ParticiperModel {
         }
 
         // Supprimer le joueur existant
-        $sql = "DELETE FROM Participer WHERE idMatch = ? AND idJoueur = ?";
+        $sql = "DELETE FROM participer WHERE idMatch = ? AND idJoueur = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$idMatch, $idJoueurARemplacer]);
 
         // Ajouter le nouveau joueur
-        $sql = "INSERT INTO Participer (idMatch, idJoueur, titulaire, poste, commentaire) 
+        $sql = "INSERT INTO participer (idMatch, idJoueur, titulaire, poste, commentaire) 
                 VALUES (?, ?, ?, ?, ?)";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$idMatch, $idJoueur, $titulaire, $poste, $commentaire]);
@@ -110,7 +110,7 @@ class ParticiperModel {
         global $pdo;
 
         // Vérifie si le joueur est déjà inscrit pour ce match
-        $query = "SELECT COUNT(*) FROM Participer WHERE idJoueur = ? AND idMatch = ?";
+        $query = "SELECT COUNT(*) FROM participer WHERE idJoueur = ? AND idMatch = ?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idJoueur, $idMatch]);
         $count = $stmt->fetchColumn();
@@ -120,22 +120,22 @@ class ParticiperModel {
             return; // Le joueur est déjà inscrit pour ce match
         }
 
-        // Sinon, insère le joueur dans la table Participer
-        $query = "INSERT INTO Participer (idJoueur, idMatch, evaluation, titulaire, poste, commentaire) VALUES (?, ?, NULL, ?, ?, ?)";
+        // Sinon, insère le joueur dans la table participer
+        $query = "INSERT INTO participer (idJoueur, idMatch, evaluation, titulaire, poste, commentaire) VALUES (?, ?, NULL, ?, ?, ?)";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idJoueur, $idMatch, $titulaire, $poste, $commentaire]);
     }
 
     public static function updateEvaluation($idMatch, $idJoueur, $evaluation) {
         global $pdo;
-        $query = "UPDATE Participer SET evaluation=? WHERE idJoueur=? AND idMatch=?";
+        $query = "UPDATE participer SET evaluation=? WHERE idJoueur=? AND idMatch=?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$evaluation, $idJoueur, $idMatch]);
     }
 
     public static function deleteParticipants($idMatch){
         global $pdo;
-        $query = "DELETE FROM Participer WHERE idMatch=?";
+        $query = "DELETE FROM participer WHERE idMatch=?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idMatch]);
     }
@@ -149,7 +149,7 @@ class ParticiperModel {
                 p.idMatch,
                 m.dateMatch,
                 ROW_NUMBER() OVER (PARTITION BY p.idJoueur ORDER BY m.dateMatch) AS row_num
-            FROM Participer p
+            FROM participer p
             JOIN Matchs m ON p.idMatch = m.idMatch
             WHERE p.titulaire = TRUE
               AND p.idJoueur = ?
