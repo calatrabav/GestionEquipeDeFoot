@@ -219,10 +219,12 @@ try {
     ];
 
     // 4) Insérer des utilisateurs
+
+    $hash = password_hash('admin', PASSWORD_DEFAULT);
     $insertUsers = "
         INSERT INTO users (username, password)
         VALUES
-            ('admin', 'admin')
+            ('admin', '$hash')
     ";
 
     // Exécution pas à pas (pour traquer une éventuelle erreur)

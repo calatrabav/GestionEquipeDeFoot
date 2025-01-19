@@ -8,7 +8,7 @@ class AuthController {
             $password = $_POST['password'];
 
             $user = UsersModel::getByUsername($username);
-            if ($user && password_verify($password, $user['password'])) {
+            if ($user && ($password, $user['password'])) {
                 $_SESSION['user'] = $user['username'];
                 header("Location: index.php?controller=joueurs&action=index");
                 exit();
