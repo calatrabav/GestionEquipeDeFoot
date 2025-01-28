@@ -104,7 +104,7 @@ class MatchModel {
             SUM(CASE WHEN titulaire=0 THEN 1 ELSE 0 END) AS remplacantCount,
             SUM(CASE WHEN m.victoire=1 THEN 1 ELSE 0 END) AS wins,
             SUM(CASE WHEN m.matchNul=1 THEN 1 ELSE 0 END) AS draws
-        FROM participer p
+        FROM Participer p
         JOIN matchs m ON p.idMatch=m.idMatch
         WHERE p.idJoueur=? 
           AND m.scoreEquipe IS NOT NULL 
