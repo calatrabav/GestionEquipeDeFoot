@@ -4,9 +4,14 @@ require_once "../models/ParticiperModel.php";
 require_once "../models/JoueursModel.php";
 
 class SelectionController {
-    public function selection() {
-        require_once "../models/MatchModel.php";
+    <?php
+require_once "../models/MatchModel.php";
+require_once "../models/JoueursModel.php";
+require_once "../models/ParticiperModel.php";
 
+class SelectionController {
+
+    public function selection() {
         // Récupérer les matchs à venir
         $matchsAVenir = MatchModel::getFuturs();
         $joueursActifs = JoueursModel::getActifs();
@@ -14,13 +19,18 @@ class SelectionController {
         $error = '';
 
         // Récupérer l'ID du match sélectionné
-        $idMatch = $_GET['idMatch'] ?? ($_POST['idMatch'] ?? null); // Récupérer l'id du match
+        $idMatch = $_GET['idMatch'] ?? ($_POST['idMatch'] ?? null);
 
-        // Si un match est sélectionné, récupérer les joueurs associés à ce match
+        // Si un match est sélectionné, récupérer les joueurs associés
         if ($idMatch) {
             if (ParticiperModel::hasParticipants($idMatch)) {
-                // Si des joueurs sont associés à ce match, récupérez-les
-                $selectedPlayersDetails = ParticiperModel::getParticipants($idMatch);
+                $participants = ParticiperModel::getParticipants($idMatch);
+                // Convertir en [idJoueur => participantData]
+                $mapped = [];
+                foreach ($participants as $p) {
+                    $mapped[$p['idJoueur']] = $p;
+                }
+                $selectedPlayersDetails = $mapped;
             }
         }
 
@@ -29,35 +39,41 @@ class SelectionController {
             $action = $_POST['action'] ?? null;
 
             if ($action === 'removeAllPlayers') {
+                // Retirer tous les joueurs
                 if ($idMatch) {
                     ParticiperModel::deleteAllParticipants($idMatch);
                     $selectedPlayersDetails = [];
                 }
-            }
-
-            if ($action === 'removePlayer') {
-                // Supprimer un joueur de la table "Participer"
+            } elseif ($action === 'removePlayer') {
+                // Retirer un joueur
                 $idJoueur = $_POST['idJoueur'] ?? null;
                 if ($idMatch && $idJoueur) {
                     ParticiperModel::deleteParticipant($idMatch, $idJoueur);
                 }
-
-                // Mettre à jour la liste des joueurs sélectionnés
-                $selectedPlayersDetails = ParticiperModel::getParticipants($idMatch);
+                $selectedPlayersDetails = self::reloadParticipants($idMatch);
             } elseif ($action === 'updatePlayer') {
-                // Modifier un joueur dans la table "Participer"
+                // Mettre à jour un joueur (poste, commentaire, titulaire, et éventuellement évaluation)
                 $idJoueur = $_POST['idJoueur'] ?? null;
-                $poste = trim($_POST['poste'] ?? '');
-                $commentaire = trim($_POST['commentaire'] ?? '');
-                $titulaire = isset($_POST['titulaire']) ? (int) $_POST['titulaire'] : 0;
+                $titulaire = $_POST['titulaire'] ?? 0;
+                $poste = $_POST['poste'] ?? '';
+                $commentaire = $_POST['commentaire'] ?? '';
+                $evaluation = $_POST['evaluation'] ?? null; 
 
-                if ($idMatch && $idJoueur) {
-                    ParticiperModel::updateParticipant($idMatch, $idJoueur,$titulaire, $poste, $commentaire);
+                // Bornage de la note [1..10]
+                if ($evaluation !== null) {
+                    $evaluation = (int)$evaluation;
+                    if ($evaluation < 1 || $evaluation > 10) {
+                        $evaluation = null; // ou forcer un msg d'erreur
+                    }
                 }
 
-                // Mettre à jour la liste des joueurs sélectionnés
-                $selectedPlayersDetails = ParticiperModel::getParticipants($idMatch);
+                if ($idMatch && $idJoueur) {
+                    ParticiperModel::updateParticipant($idMatch, $idJoueur, $titulaire, $poste, $commentaire, $evaluation);
+                }
+                $selectedPlayersDetails = self::reloadParticipants($idMatch);
+
             } elseif ($action === 'replacePlayer') {
+                // Remplacer un joueur par un autre
                 $idJoueurARemplacer = $_POST['idJoueurARemplacer'] ?? null;
                 $idJoueur = $_POST['idJoueur'] ?? null;
                 $titulaire = $_POST['titulaire'] ?? 0;
@@ -67,19 +83,20 @@ class SelectionController {
                 try {
                     if ($idMatch && $idJoueurARemplacer && $idJoueur) {
                         ParticiperModel::replaceParticipant($idMatch, $idJoueurARemplacer, $idJoueur, $titulaire, $poste, $commentaire);
-                        $selectedPlayersDetails = ParticiperModel::getParticipants($idMatch);
-                        $joueursNonParticipants = ParticiperModel::getNonParticipants($idMatch);
                     }
                 } catch (Exception $e) {
                     $error = $e->getMessage();
                 }
-            } else {
-                // Logique pour ajouter ou modifier des joueurs
-                $selection = $_POST['selection'] ?? [];
+                $selectedPlayersDetails = self::reloadParticipants($idMatch);
 
-                if (count($selection) <= 11 || count($selection) > 16) {
+            } else {
+                // Ajouter/modifier la sélection
+                $selection = $_POST['selection'] ?? [];
+                // Vérifier le nombre de joueurs
+                if (count($selection) < 11 || count($selection) > 16) {
                     $error = 'Vous devez sélectionner entre 11 et 16 joueurs.';
                 } else {
+                    // Parcourir la sélection
                     foreach ($selection as $idJoueur => $details) {
                         $poste = $details['poste'] ?? '';
                         $commentaireStaff = $details['commentaire'] ?? null;
@@ -91,14 +108,65 @@ class SelectionController {
                             ParticiperModel::deleteParticipant($idMatch, $idJoueur);
                         }
                     }
-
-                    // Mettre à jour la liste des joueurs sélectionnés après modification
-                    $selectedPlayersDetails = ParticiperModel::getParticipants($idMatch);
                 }
+                $selectedPlayersDetails = self::reloadParticipants($idMatch);
             }
         }
 
-        // Envoi des données vers la vue
-        require_once "../views/selection/selection.php";
+        // Appel de la vue
+        require_once __DIR__ . "/../views/selection/selection.php";
+    }
+
+    /**
+     * Méthode utilitaire pour recharger la liste des participants.
+     */
+    private static function reloadParticipants($idMatch) {
+        $arr = ParticiperModel::getParticipants($idMatch);
+        $mapped = [];
+        foreach ($arr as $p) {
+            $mapped[$p['idJoueur']] = $p;
+        }
+        return $mapped;
+    }
+}
+
+
+    public function evaluation() {
+        $idMatch = $_GET['idMatch'] ?? null;
+        if (!$idMatch) {
+            header("Location: index.php?controller=matchs&action=index");
+            exit();
+        }
+
+        // On récupère le match
+        $match = MatchModel::getById($idMatch);
+        if (!$match) {
+            header("Location: index.php?controller=matchs&action=index");
+            exit();
+        }
+
+        // On récupère les participants actuels
+        $participants = ParticiperModel::getParticipants($idMatch);
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // On suppose que $_POST['evaluation'] = [idJoueur => valeur]
+            if (isset($_POST['evaluation'])) {
+                foreach ($_POST['evaluation'] as $idJoueur => $note) {
+                    // Convertir en entier
+                    $note = (int)$note;
+                    // Vérifier que la note est entre 1 et 10
+                    if ($note >= 1 && $note <= 10) {
+                        ParticiperModel::updateEvaluation($idMatch, $idJoueur, $note);
+                    }
+                }
+            }
+
+            // On peut rediriger vers la page de stats, ou recharger la page
+            header("Location: index.php?controller=stats&action=index");
+            exit();
+        }
+
+        // Sinon, on affiche le formulaire
+        require_once "../views/selection/evaluation.php";
     }
 }

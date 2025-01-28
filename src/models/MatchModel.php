@@ -71,50 +71,82 @@ class MatchModel {
         $stmt->execute([$scoreEquipe, $scoreEquipeAdverse, $victoire, $matchNul, $idMatch]);
     }
 
-    public static function getGlobalStats() {
-        global $pdo;
-        // Victoires = matches où victoire=1
-        // Nuls = matches où matchNul=1
-        // Défaites = total - victoires - nuls
-        // On ne considère que les matchs terminés (scoreEquipe IS NOT NULL)
-        $stmt = $pdo->query("SELECT
-            SUM(CASE WHEN victoire=1 THEN 1 ELSE 0 END) AS victoires,
-            SUM(CASE WHEN matchNul=1 THEN 1 ELSE 0 END) AS nuls,
-            COUNT(*) AS total
-        FROM matchs
-        WHERE scoreEquipe IS NOT NULL AND scoreEquipeAdverse IS NOT NULL");
-        $res = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // Calcul des défaites
-        $defaites = $res['total'] - $res['victoires'] - $res['nuls'];
-
-        // On ajoute cette info dans $res
-        $res['defaites'] = $defaites;
-        return $res;
-    }
-
     public static function getPlayerStats($idJoueur) {
         global $pdo;
-        // On compte les matchs auxquels le joueur a participé.
-        // On utilise victoire et matchNul pour déterminer le type de résultat.
-        $stmt = $pdo->prepare("SELECT 
-            COUNT(*) AS totalMatches,
-            AVG(evaluation) AS avgEval,
-            SUM(CASE WHEN titulaire=1 THEN 1 ELSE 0 END) AS titulaireCount,
-            SUM(CASE WHEN titulaire=0 THEN 1 ELSE 0 END) AS remplacantCount,
-            SUM(CASE WHEN m.victoire=1 THEN 1 ELSE 0 END) AS wins,
-            SUM(CASE WHEN m.matchNul=1 THEN 1 ELSE 0 END) AS draws
-        FROM Participer p
-        JOIN matchs m ON p.idMatch=m.idMatch
-        WHERE p.idJoueur=? 
-          AND m.scoreEquipe IS NOT NULL 
-          AND m.scoreEquipeAdverse IS NOT NULL");
+    
+        $sql = "
+        SELECT
+          COUNT(*) AS totalMatches, 
+          SUM(CASE WHEN m.victoire = 1 THEN 1 ELSE 0 END) AS wins,
+          SUM(CASE WHEN m.matchNul = 1 THEN 1 ELSE 0 END) AS draws,
+          SUM(CASE WHEN p.titulaire=1 THEN 1 ELSE 0 END) AS titulaireCount,
+          SUM(CASE WHEN p.titulaire=0 THEN 1 ELSE 0 END) AS remplacantCount,
+    
+          COUNT(p.evaluation) AS nbMatchsEval,  -- nb lignes où evaluation n'est PAS NULL
+          AVG(p.evaluation)   AS avgEval        -- moyenne sur ces lignes
+        FROM participer p
+        JOIN matchs m ON p.idMatch = m.idMatch
+        WHERE p.idJoueur = ?
+        ";
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([$idJoueur]);
-        $s = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // Calcul des défaites
-        $losses = $s['totalMatches'] - $s['wins'] - $s['draws'];
-        $s['losses'] = $losses;
-        return $s;
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        if (!$res) {
+            // Si aucun match trouvé, on renvoie un tableau vide ou par défaut
+            return [
+                'totalMatches' => 0,
+                'wins' => 0,
+                'draws' => 0,
+                'titulaireCount' => 0,
+                'remplacantCount' => 0,
+                'nbMatchsEval' => 0,
+                'avgEval' => null,
+                'losses' => 0
+            ];
+        }
+    
+        // Calcul des défaites = totalMatches - wins - draws
+        $defaites = $res['totalMatches'] - $res['wins'] - $res['draws'];
+        $res['losses'] = $defaites;
+    
+        return $res;
     }
+    
+    
+
+    public static function getGlobalStats()
+{
+    global $pdo;
+    // Victoire = match où victoire=1
+    // Nul = match où matchNul=1
+    // Défaite = total - victoires - nuls
+    // On ne considère que les matchs terminés (scoreEquipe IS NOT NULL)
+    // si tu gères le score dans la table Matchs.
+    $stmt = $pdo->query("SELECT
+        SUM(CASE WHEN victoire = 1 THEN 1 ELSE 0 END) AS victoires,
+        SUM(CASE WHEN matchNul = 1 THEN 1 ELSE 0 END) AS nuls,
+        COUNT(*) AS total
+    FROM matchs
+    WHERE scoreEquipe IS NOT NULL
+      AND scoreEquipeAdverse IS NOT NULL");
+
+    $res = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$res) {
+        return [
+            'victoires' => 0,
+            'nuls' => 0,
+            'defaites' => 0,
+            'total' => 0
+        ];
+    }
+
+    // Calcul des défaites
+    $defaites = $res['total'] - $res['victoires'] - $res['nuls'];
+    $res['defaites'] = $defaites;
+
+    return $res;  // On retourne un tableau [victoires, nuls, defaites, total]
+}
+
+    
 }

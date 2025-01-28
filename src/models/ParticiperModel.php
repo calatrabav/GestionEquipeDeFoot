@@ -1,89 +1,112 @@
 <?php
-class participerModel {
+class ParticiperModel {
+    /**
+     * Récupère tous les participants (joueurs) pour un match donné.
+     */
     public static function getParticipants($idMatch) {
         global $pdo;
+        // Note: On doit entourer `evaluation` de backticks si c'est le nom exact dans la table
         $query = "
-        SELECT 
-            p.idJoueur,
-            j.nomJoueur,
-            j.prenomJoueur,
-            p.titulaire,
-            p.poste,
-            p.commentaire
-        FROM participer p
-        JOIN Joueurs j ON p.idJoueur = j.idJoueur
-        WHERE p.idMatch = ?
-    ";
+            SELECT 
+                p.idJoueur,
+                j.nomJoueur,
+                j.prenomJoueur,
+                p.titulaire,
+                p.poste,
+                p.commentaire,
+                p.evaluation
+            FROM participer p
+            JOIN joueurs j ON p.idJoueur = j.idJoueur
+            WHERE p.idMatch = ?
+        ";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idMatch]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**eval
+     * Vérifie si un match a déjà des participants.
+     */
     public static function hasParticipants($idMatch) {
         global $pdo;
         $query = "SELECT COUNT(*) AS count FROM participer WHERE idMatch = ?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idMatch]);
-
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['count'] > 0; // Retourne true si des joueurs sont associés au match
+        return $result['count'] > 0;
     }
 
-    public static function updateParticipant($idMatch, $idJoueur, $titulaire, $poste, $commentaire) {
+    /**
+     * Met à jour les infos d'un participant (titulaire, poste, commentaire).
+     * Ne gère pas encore l'evaluation ici (possible de le faire).
+     */
+    public static function updateParticipant($idMatch, $idJoueur, $titulaire, $poste, $commentaire, $evaluation) {
         global $pdo;
-        $query = "UPDATE participer SET titulaire = ?, poste = ?, commentaire = ? WHERE idMatch = ? AND idJoueur = ?";
+        $query = "UPDATE participer 
+                  SET titulaire=?, poste=?, commentaire=?, `evaluation`=? 
+                  WHERE idMatch=? AND idJoueur=?";
         $stmt = $pdo->prepare($query);
-        $stmt->execute([$titulaire, $poste, $commentaire, $idMatch, $idJoueur]);
+        $stmt->execute([$titulaire, $poste, $commentaire, $evaluation, $idMatch, $idJoueur]);
     }
 
+    /**
+     * Supprime un participant pour un match donné.
+     */
     public static function deleteParticipant($idMatch, $idJoueur) {
-        // Code pour supprimer le joueur de la table "participer"
         global $pdo;
         $query = "DELETE FROM participer WHERE idMatch = ? AND idJoueur = ?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idMatch, $idJoueur]);
     }
 
+    /**
+     * Récupère un participant précis (idMatch + idJoueur).
+     */
     public static function getParticipantById($idMatch, $idJoueur) {
         global $pdo;
-        $query = "SELECT * FROM participer 
-            WHERE idMatch = ? AND idJoueur = ?
-        ";
+        $query = "SELECT * FROM participer
+                  WHERE idMatch = ? AND idJoueur = ?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idMatch, $idJoueur]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Récupère les joueurs actifs qui ne participent pas encore à ce match.
+     */
     public static function getNonParticipants($idMatch) {
         global $pdo;
-        // Requête pour sélectionner les joueurs qui ne sont pas dans participer pour ce match
         $sql = "
-            SELECT j.idJoueur, nomJoueur, prenomJoueur
-            FROM Joueurs j
+            SELECT j.idJoueur, j.nomJoueur, j.prenomJoueur
+            FROM joueurs j
             WHERE j.statut = 'Actif'
               AND NOT EXISTS (
-                SELECT *
+                SELECT 1
                 FROM participer p 
                 WHERE p.idJoueur = j.idJoueur AND p.idMatch = ?
               )
         ";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$idMatch]);
-
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    public static function deleteAllParticipants($idMatch)
-    {
+
+    /**
+     * Supprime tous les participants pour un match.
+     */
+    public static function deleteAllParticipants($idMatch) {
         global $pdo;
         $query = "DELETE FROM participer WHERE idMatch = ?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idMatch]);
     }
 
+    /**
+     * Remplace un joueur par un autre (dans la table participer).
+     */
     public static function replaceParticipant($idMatch, $idJoueurARemplacer, $idJoueur, $titulaire, $poste, $commentaire) {
         global $pdo;
-
-        // Vérifier si le joueur à ajouter ne participe pas déjà au match
+        // Vérifie si le nouveau joueur n'est pas déjà dans le match
         $sql = "SELECT COUNT(*) as count FROM participer WHERE idMatch = ? AND idJoueur = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$idMatch, $idJoueur]);
@@ -93,55 +116,59 @@ class participerModel {
             throw new Exception("Le joueur sélectionné participe déjà à ce match.");
         }
 
-        // Supprimer le joueur existant
+        // Supprime l'ancien joueur
         $sql = "DELETE FROM participer WHERE idMatch = ? AND idJoueur = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$idMatch, $idJoueurARemplacer]);
 
-        // Ajouter le nouveau joueur
-        $sql = "INSERT INTO participer (idMatch, idJoueur, titulaire, poste, commentaire) 
-                VALUES (?, ?, ?, ?, ?)";
+        // Ajoute le nouveau joueur
+        $sql = "INSERT INTO participer (idMatch, idJoueur, `evaluation`, titulaire, poste, commentaire) 
+                VALUES (?, ?, NULL, ?, ?, ?)";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$idMatch, $idJoueur, $titulaire, $poste, $commentaire]);
-
     }
 
+    /**
+     * Insère un participant si pas déjà présent. (evaluation initialisée à NULL)
+     */
     public static function insertParticipant($idMatch, $idJoueur, $titulaire, $poste, $commentaire) {
         global $pdo;
-
-        // Vérifie si le joueur est déjà inscrit pour ce match
+        // Vérifie si déjà inscrit
         $query = "SELECT COUNT(*) FROM participer WHERE idJoueur = ? AND idMatch = ?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idJoueur, $idMatch]);
         $count = $stmt->fetchColumn();
 
-        // Si une ligne existe déjà, ne rien insérer
         if ($count > 0) {
-            return; // Le joueur est déjà inscrit pour ce match
+            // déjà inscrit
+            return;
         }
 
-        // Sinon, insère le joueur dans la table participer
-        $query = "INSERT INTO participer (idJoueur, idMatch, evaluation, titulaire, poste, commentaire) VALUES (?, ?, NULL, ?, ?, ?)";
+        // Sinon insertion
+        $query = "INSERT INTO participer (idJoueur, idMatch, `evaluation`, titulaire, poste, commentaire)
+                  VALUES (?, ?, NULL, ?, ?, ?)";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$idJoueur, $idMatch, $titulaire, $poste, $commentaire]);
     }
 
+    /**
+     * Met à jour l'evaluation (colonne `evaluation`) pour un participant.
+     * Valeur attendue : 1 à 10.
+     */
     public static function updateEvaluation($idMatch, $idJoueur, $evaluation) {
         global $pdo;
-        $query = "UPDATE participer SET evaluation=? WHERE idJoueur=? AND idMatch=?";
+        // On protège `evaluation` par des backticks
+        $query = "UPDATE participer SET `evaluation` = ? WHERE idMatch = ? AND idJoueur = ?";
         $stmt = $pdo->prepare($query);
-        $stmt->execute([$evaluation, $idJoueur, $idMatch]);
+        $stmt->execute([$evaluation, $idMatch, $idJoueur]);
     }
 
-    public static function deleteParticipants($idMatch){
-        global $pdo;
-        $query = "DELETE FROM participer WHERE idMatch=?";
-        $stmt = $pdo->prepare($query);
-        $stmt->execute([$idMatch]);
-    }
-
+    /**
+     * Récupère le nombre de matchs consécutifs (exemple de stats).
+     */
     public static function getConsecutiveMatchCount($idJoueur) {
         global $pdo;
+        // Cette requête est un exemple, elle dépend de ta logique
         $query = "
         WITH MatchsJoueur AS (
             SELECT 
@@ -150,7 +177,7 @@ class participerModel {
                 m.dateMatch,
                 ROW_NUMBER() OVER (PARTITION BY p.idJoueur ORDER BY m.dateMatch) AS row_num
             FROM participer p
-            JOIN Matchs m ON p.idMatch = m.idMatch
+            JOIN matchs m ON p.idMatch = m.idMatch
             WHERE p.titulaire = TRUE
               AND p.idJoueur = ?
         ),
@@ -167,13 +194,13 @@ class participerModel {
             COUNT(*) AS nbMatchsConsecutifs
         FROM MatchsConsecutifs
         GROUP BY idJoueur, grp
-        ORDER BY idJoueur, nbMatchsConsecutifs DESC
-    ";
+        ORDER BY nbMatchsConsecutifs DESC
+        LIMIT 1;
+        ";
         $stmt = $pdo->prepare($query);
-
         $stmt->execute([$idJoueur]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $result ? $result['nbMatchsConsecutifs'] : 0; // Si aucun résultat, retourne 0
+        return $result ? $result['nbMatchsConsecutifs'] : 0;
     }
 }
